@@ -13,6 +13,7 @@
 ********************************************************************************************/
 
 #include "raylib.h"
+#include "raymath.h"
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
@@ -42,7 +43,7 @@ int numPoints = 0;
 Vector2 disks[MAXPOINTS*4];
 int numDisks = 0;
 
-int diskRadius = 100;
+float diskRadius = 100.0f;
 
 int reset = false;
 int compute = false;
@@ -201,6 +202,21 @@ static void computeUnitDisksApprox()
 		Vector2 point = points[i];
 
 		// Add disks
+		Vector2 dist1 = {sqrt(3)*diskRadius, 0};
+		Vector2 dist2 = Vector2Rotate(dist1, +PI/3);
+		Vector2 dist3 = Vector2Rotate(dist1, -PI/3);
+
 		disks[numDisks++] = point;
+		disks[numDisks++] = Vector2Add(point, dist1);
+		disks[numDisks++] = Vector2Add(point, dist2);
+		disks[numDisks++] = Vector2Add(point, dist3);
+
+		covered[i] = true;
+		for (int j=i+1; j<numPoints; j++) {
+			// NOTE: instead check against the 4 disks above for better results
+			if (Vector2Distance(point, points[j]) <= 2*diskRadius) {
+				covered[j] = true;
+			}
+		}
 	}
 }
