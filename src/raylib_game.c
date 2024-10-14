@@ -21,7 +21,7 @@
 // Constant Definition
 //---------------------------------------------------------------------------------
 static const Color pointColor = BLACK;
-static const float pointSize = 10;
+static const float pointSize = 5;
 #define MAXPOINTS 128
 
 static const int buttonWidth = 80;
@@ -122,7 +122,7 @@ static void DrawFrame(void)
     // Draw
     //----------------------------------------------------------------------------------
 	ClearBackground(WHITE);
-	DrawText("Click to add points!", screenWidth/2-150, screenHeight/2, 20, GRAY);
+	DrawText("Click to add points!", screenWidth/2-150, screenHeight/2, 20, LIGHTGRAY);
 
 	// Draw points
 	for (int i=0; i<numPoints; i++) {
