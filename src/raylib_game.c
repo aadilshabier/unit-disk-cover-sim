@@ -20,9 +20,15 @@
 //----------------------------------------------------------------------------------
 // Constant Definition
 //---------------------------------------------------------------------------------
+static const int screenWidth = 1200;
+static const int screenHeight = 800;
+
+#define MAXPOINTS 128
+
 static const Color pointColor = BLACK;
 static const float pointSize = 5;
-#define MAXPOINTS 128
+
+static const Color approxDiskColor = RED;
 
 static const int buttonWidth = 80;
 static const int buttonHeight = 40;
@@ -30,11 +36,13 @@ static const int buttonHeight = 40;
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
 //----------------------------------------------------------------------------------
-static const int screenWidth = 1200;
-static const int screenHeight = 800;
-
 Vector2 points[MAXPOINTS];
 int numPoints = 0;
+
+Vector2 disks[MAXPOINTS*4];
+int numDisks = 0;
+
+int diskRadius = 100;
 
 int reset = false;
 int compute = false;
@@ -52,6 +60,11 @@ static void drawPoint(Vector2 point);
 /* float TextToFloat(const char *text); */
 
 static int shouldTrack(Vector2 pointerPos);
+
+static void computeUnitDisksApprox();
+static void computeUnitDisksOptim();
+
+static int pointCompare(const void *pA, const void *pB);
 
 //----------------------------------------------------------------------------------
 // Main entry point
@@ -95,7 +108,8 @@ static void UpdateFrame(void)
 	}
 
 	if (compute) {
-		// compute result
+		computeUnitDisksApprox();
+		compute = false;
 	}
 
 	Vector2 pointerPos = GetMousePosition();
@@ -111,8 +125,6 @@ static void DrawGUI(void)
 	int offset = 10;
 	reset = GuiButton((Rectangle){50, baseH, buttonWidth, buttonHeight}, "Reset");
 	compute = GuiButton((Rectangle){50, baseH+offset+buttonHeight, buttonWidth, buttonHeight}, "Compute");
-
-	return;
 }
 
 // Draw game frame
@@ -128,6 +140,12 @@ static void DrawFrame(void)
 	for (int i=0; i<numPoints; i++) {
 		drawPoint(points[i]);
 	}
+
+	// Draw points
+	for (int i=0; i<numDisks; i++) {
+		DrawCircleLinesV(disks[i], diskRadius, approxDiskColor);
+	}
+
 	//----------------------------------------------------------------------------------
 }
 
@@ -143,6 +161,7 @@ static void addPoint(Vector2 point)
 static void clearPoints(void)
 {
 	numPoints = 0;
+	numDisks = 0;
 }
 
 static void drawPoint(Vector2 point)
@@ -155,5 +174,33 @@ static void drawPoint(Vector2 point)
 // Check if clicked point is somewhere that can contain points. i.e: not on
 static int shouldTrack(Vector2 pointerPos)
 {
-	return 1;
+	Rectangle guiArea = {50, 50, 100, 100};
+	return !CheckCollisionPointRec(pointerPos, guiArea);
+}
+
+static int pointCompare(const void *pA, const void *pB)
+{
+	Vector2 a = *(Vector2*)pA;
+	Vector2 b = *(Vector2*)pB;
+	if (a.x == b.x) {
+		return a.y - b.y;
+	} else {
+		return a.x - b.x;
+	}
+}
+
+// Approximation Algorithm to compute unit disks
+static void computeUnitDisksApprox()
+{
+	qsort(points, numPoints, sizeof(*points), pointCompare);
+
+	bool covered[MAXPOINTS] = {0};
+	for (int i=0; i<numPoints; i++) {
+		if (covered[i]) continue;
+
+		Vector2 point = points[i];
+
+		// Add disks
+		disks[numDisks++] = point;
+	}
 }
