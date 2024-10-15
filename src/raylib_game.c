@@ -220,8 +220,10 @@ static void computeUnitDisksApprox()
 		covered[i] = true;
 		for (int j=i+1; j<numPoints; j++) {
 			// NOTE: instead check against the 4 disks above for better results
-			if (Vector2Distance(point, points[j]) <= 2*diskRadius) {
-				covered[j] = true;
+			for (int k=numDisks-4; k<numDisks; k++) {
+				if (CheckCollisionPointCircle(points[j], disks[k], currentDiskRadius)) {
+					covered[j] = true;
+				}
 			}
 		}
 	}
