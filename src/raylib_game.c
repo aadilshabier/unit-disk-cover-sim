@@ -44,6 +44,7 @@ Vector2 disks[MAXPOINTS*4];
 int numDisks = 0;
 
 float diskRadius = 100.0f;
+float currentDiskRadius = 0;
 
 int reset = false;
 int compute = false;
@@ -109,13 +110,15 @@ static void UpdateFrame(void)
 	}
 
 	if (compute) {
+		numDisks = 0;
+		currentDiskRadius = diskRadius;
 		computeUnitDisksApprox();
 		compute = false;
 	}
 
 	Vector2 pointerPos = GetMousePosition();
 	if (shouldTrack(pointerPos) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-		TraceLog(LOG_INFO, "Mouse clicked at position: (%f, %f)", pointerPos.x, pointerPos.y);
+		TraceLog(LOG_DEBUG, "Mouse clicked at position: (%f, %f)", pointerPos.x, pointerPos.y);
 		addPoint(pointerPos);
 	}
 }
@@ -123,9 +126,12 @@ static void UpdateFrame(void)
 static void DrawGUI(void)
 {
 	int baseH = 50;
+	int baseW = 50;
 	int offset = 10;
-	reset = GuiButton((Rectangle){50, baseH, buttonWidth, buttonHeight}, "Reset");
-	compute = GuiButton((Rectangle){50, baseH+offset+buttonHeight, buttonWidth, buttonHeight}, "Compute");
+	reset = GuiButton((Rectangle){baseW, baseH, buttonWidth, buttonHeight}, "Reset");
+	compute = GuiButton((Rectangle){baseW, baseH+offset+buttonHeight, buttonWidth, buttonHeight}, "Compute");
+
+	GuiSlider((Rectangle){baseW, baseH+2*offset+2*buttonHeight, buttonWidth, buttonHeight/2}, "0", "200", &diskRadius, 0.0f, 200.f);
 }
 
 // Draw game frame
@@ -144,7 +150,7 @@ static void DrawFrame(void)
 
 	// Draw points
 	for (int i=0; i<numDisks; i++) {
-		DrawCircleLinesV(disks[i], diskRadius, approxDiskColor);
+		DrawCircleLinesV(disks[i], currentDiskRadius, approxDiskColor);
 	}
 
 	//----------------------------------------------------------------------------------
@@ -202,7 +208,7 @@ static void computeUnitDisksApprox()
 		Vector2 point = points[i];
 
 		// Add disks
-		Vector2 dist1 = {sqrt(3)*diskRadius, 0};
+		Vector2 dist1 = {sqrt(3)*currentDiskRadius, 0};
 		Vector2 dist2 = Vector2Rotate(dist1, +PI/3);
 		Vector2 dist3 = Vector2Rotate(dist1, -PI/3);
 
