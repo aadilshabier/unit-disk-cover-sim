@@ -27,9 +27,9 @@ static const int screenHeight = 800;
 #define MAXPOINTS 128
 
 static const Color pointColor = BLACK;
-static const float pointSize = 5;
+static const float pointSize = 6;
 
-static const Color approxDiskColor = RED;
+static const Color approxDiskColor = BLUE;
 
 static const int buttonWidth = 80;
 static const int buttonHeight = 40;
@@ -167,7 +167,7 @@ static void clearPoints(void)
 
 static void drawPoint(Vector2 point)
 {
-	const float offset = pointSize / 2;
+	const float offset = (pointSize+1) / 2;
 	DrawRectangle(point.x-offset, point.y-offset, pointSize, pointSize, pointColor);
 	/* DrawPixelV(point, pointColor); */
 }
@@ -175,7 +175,7 @@ static void drawPoint(Vector2 point)
 // Check if clicked point is somewhere that can contain points. i.e: not on
 static int shouldTrack(Vector2 pointerPos)
 {
-	Rectangle guiArea = {50, 50, 100, 100};
+	Rectangle guiArea = {50, 50, 100, 150};
 	return !CheckCollisionPointRec(pointerPos, guiArea);
 }
 
